@@ -1,20 +1,16 @@
 import { useEffect, useState } from 'react';
 import './index.css';
 
-const SettingsModal = ({setShowSettings, setSettings}) => {
+const SettingsModal = (props) => {
 
     const [mainSettings, setMainSettings] = useState({
-        wordLength: '',
-        tries: '',
+        wordLength: 5,
+        tries: 6,
     });
 
-    // useEffect(() => {
-    //     const defaultSettings = {
-    //         wordLength: 5, 
-    //         tries: 6, 
-    //     };
-    //     setMainSettings(defaultSettings);
-    // },[])
+    useEffect(() => {
+
+    },[])
         
     const handleInputChange = (event) => {
         const target = event.target;
@@ -26,8 +22,7 @@ const SettingsModal = ({setShowSettings, setSettings}) => {
 
     const handleSettingsSubmit = (event) => {
         event.preventDefault();
-        setSettings(mainSettings);
-        setShowSettings(false);
+        
     }
 
     return (

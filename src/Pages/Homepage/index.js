@@ -1,10 +1,17 @@
 import './index.css';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import SettingsModal from '../../Components/SettingsModal';
 
 const Homepage = () => {
     const [showSettings, setShowSettings] = useState(false);
-    const [settings, setSettings] = useState({});
+    const [settings, setSettings] = useState();
+
+    useEffect(()=>{
+
+        setSettings(settings);   
+        
+    },[])
     
     const handleShowSettings = ()=> {
         setShowSettings(!showSettings);
@@ -21,11 +28,9 @@ const Homepage = () => {
     return (
         <div className='centered-container'>
             <h1 className='title'>INFINITE WORDLE</h1>
-            { showSettings && <SettingsModal setShowSettings={setShowSettings} setSettings={setSettings} /> }
-            { !showSettings && <button className='standard-btn' onClick={handleStart}>START</button> }
-           
-            <button className='standard-btn' onClick={handleShowSettings}>{ showSettings ? 'CLOSE':'SETTINGS'}</button>
-        </div>
+            <Link to='/play'><button className='standard-btn'>START</button></Link>
+            <Link to='/settings'><button className='standard-btn'>SETTINGS</button></Link>
+         </div>
     );
 }
 
