@@ -1,0 +1,35 @@
+body {
+    background-color: #79A9D1;
+}
+
+.centered-container {
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    height: 100vh;
+    row-gap: 1em;
+}
+
+.title {
+    color: white;
+    height: min-content;
+}
+
+.standard-btn {
+    background-color: #2F4550;
+    border: 2px solid #2F4550;
+    color: white;
+    border-radius: 5px;
+    padding: 1em;
+    padding-left: 2em;
+    padding-right: 2em;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.standard-btn:hover {
+    color: #2F4550;
+    background-color: white;
+    border: 2px solid #2F4550;
+}
