@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import LetterGrid from '../../Components/LetterGrid';
 import './index.css';
 
 var randomWords = require('random-words');
 
 const Header = () => {
-    return (
-        <div className='header-container'>    
+    return (  
         <div className='header-row'> 
-            <button className='standard-btn'>QUIT</button>   
-            <h1 className='title'>CUSTOM WORDLE</h1>  
-            </div>  
-        </div>
-    )
+            <Link className='standard-btn header-btn' to='/'>QUIT</Link>
+            <h1 className='title  header-title'>CUSTOM WORDLE</h1>  
+        </div>  
+    );
 }
 
 const GameOver = (props) => {
     return (
         <div className='gameover-container'>
             <h1 className='title'>GAME COMPLETE</h1>
-            <p><strong>WORD:</strong> {props.word.toUpperCase()}</p>
-            <p><strong>TRIES:</strong></p>
-            <button className='standard-btn' onClick={()=>window.location.reload()}>PLAY AGAIN</button>
-            <button className='standard-btn gameover-btn'>HOME</button>
+            <p><strong>WORD:</strong> { props.word.toUpperCase() } </p>
+            <p><strong>TRIES:</strong> { props.tries } </p>
+            <div className='btns-row'>
+                <button className='standard-btn' onClick={()=>window.location.reload()}>PLAY AGAIN</button>
+                <Link className='standard-btn gameover-btn' to='/'>HOME</Link>
+            </div>
         </div>
     );
 }
@@ -31,6 +32,7 @@ const GamePage = (props) => {
     const [wordDetails, setWordDetails] = useState({});
     const [rowWord, setRowWord] = useState({});
     const [submittedLetters, setSubmittedLetters] = useState([]);
+    const [tries, setTries] = useState(0)
     const [gameOver, setGameOver] = useState(false);
 
     useEffect(()=>{
@@ -61,20 +63,24 @@ const GamePage = (props) => {
         let letter = target.value;
         
         if (letter.length <= 1) {
-            setRowWord({...rowWord, [name]:letter.toUpperCase()});
+            setRowWord(sortObject({...rowWord, [name]:letter.toUpperCase()}));  
         }
+    }
+    // Ensures word is compared correctly if it has been inputted in an irregaular way
+    const sortObject = (obj) => {
+        return Object.keys(obj).sort().reduce((res, key) => {
+            res[key] = obj[key];
+            return res;
+        }, {})
     }
 
     const handleGameOver = (wordDetails) => {
-
         for(let i = 0; i<=wordDetails.defaultTries-1; i++) {
-
             let form = document.getElementById('form_'+(i));
             for (const inputField of form.children) {
                 inputField.setAttribute('disabled','');
             }
         }
-
         setGameOver(true);
     }
 
@@ -131,9 +137,12 @@ const GamePage = (props) => {
         if(usedLettersValues.every(gameWon)) {
             handleGameOver(wordDetails);
         }
- 
+
+        //Set number of tries
+        setTries(tries+1)
     }
 
+    // Creating the game form grid (inputGrid)
     const inputGrid = []
     for(let i = 0; i <= wordDetails.defaultTries-1; i++) {
         const inputRow = [];
@@ -144,7 +153,7 @@ const GamePage = (props) => {
                 inputRow.push(<input key={'input_'+i+'_'+n} id={'input_'+i+'_'+n} className='game-input' type='text' name={'input_'+i+'_'+n} value={rowWord['input_'+i+'_'+n]} onChange={handleInput} disabled />);
             }
         }
-        inputGrid.push(<form key={'form_'+i} id={'form_'+i} onSubmit={handleRowSubmit} className='row-form'>{inputRow}<input hidden key={'form_submit_'+i} type='submit'/></form>, <br/> );
+        inputGrid.push(<form autoComplete='off' key={'form_'+i} id={'form_'+i} onSubmit={handleRowSubmit} className='row-form'>{inputRow}<input hidden key={'form_submit_'+i} type='submit'/></form>, <br/> );
     }
 
     
@@ -155,7 +164,7 @@ const GamePage = (props) => {
             {inputGrid}
         </div>
           
-        { gameOver ? <GameOver word={wordDetails.wordString} /> : <LetterGrid submittedLetters={submittedLetters}  />}
+        { gameOver ? <GameOver tries={tries} word={wordDetails.wordString} /> : <LetterGrid submittedLetters={submittedLetters}  />}
 
         </div>
     )

@@ -26,6 +26,8 @@ body {
     cursor: pointer;
     font-weight: bold;
     transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
 }
 
 .standard-btn:hover {

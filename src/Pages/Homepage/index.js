@@ -1,7 +1,6 @@
 import './index.css';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import SettingsModal from '../../Components/SettingsModal';
 
 const Homepage = () => {
     const [showSettings, setShowSettings] = useState(false);
@@ -28,8 +27,8 @@ const Homepage = () => {
     return (
         <div className='centered-container'>
             <h1 className='title'>INFINITE WORDLE</h1>
-            <Link to='/play'><button className='standard-btn'>START</button></Link>
-            <Link to='/settings'><button className='standard-btn'>SETTINGS</button></Link>
+            <Link className='standard-btn' to='/play'>START</Link>
+            <Link className='standard-btn' to='/settings'>SETTINGS</Link>
          </div>
     );
 }
