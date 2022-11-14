@@ -3,12 +3,18 @@ import { Link } from 'react-router-dom';
 import LetterGrid from '../../Components/LetterGrid';
 import './index.css';
 
-var randomWords = require('random-words');
+// var randomWords = require('random-words');
+let randomWords = require('random-english-words');
 
-const Header = () => {
-    return (  
+const Header = (props) => {
+    useEffect(()=>{
+        if(props.showQuit) {
+            document.getElementById('quit-btn').style.visibility = 'hidden'
+        }
+    },[props.showQuit])
+    return (
         <div className='header-row'> 
-            <Link className='standard-btn header-btn' to='/'>QUIT</Link>
+        <Link id='quit-btn' className='standard-btn header-btn' to='/'>QUIT</Link>
             <h1 className='title  header-title'>CUSTOM WORDLE</h1>  
         </div>  
     );
@@ -21,7 +27,6 @@ const GameOver = (props) => {
             <p><strong>WORD:</strong> { props.word.toUpperCase() } </p>
             <p><strong>TRIES:</strong> { props.tries } </p>
             <div className='btns-row'>
-                <button className='standard-btn' onClick={()=>window.location.reload()}>PLAY AGAIN</button>
                 <Link className='standard-btn gameover-btn' to='/'>HOME</Link>
             </div>
         </div>
@@ -37,13 +42,13 @@ const GamePage = (props) => {
 
     useEffect(()=>{
         let settings = props.settings;
-        let defaultTries = 6; 
-        let randomWord = randomWords({exactly: 1, maxLength: 5});
-        let [ randomWordString ] = randomWord;
+        let defaultTries = Number(settings.tries);
+        let randomWordString = randomWords({minCount: 1, minChars: Number(settings.wordLength), maxChars: Number(settings.wordLength)})
 
         let wordLength = randomWordString.length;
         let wordSplit = randomWordString.toUpperCase().split('');
 
+        //Main object with word and game info
         let wordDetails = { 
             wordString: randomWordString,
             defaultTries: defaultTries,
@@ -53,18 +58,21 @@ const GamePage = (props) => {
 
         setWordDetails(wordDetails);
 
-        console.log(wordDetails.wordString)
+    }, [props.settings])
 
-    }, [])
+    const validateString = (str) => {
+        return /^[A-Za-z]/.test(str)
+    }
 
     const handleInput = (event) => {
         const target = event.target;
         const name = target.name;
         let letter = target.value;
         
-        if (letter.length <= 1) {
+        // Validate letter length is 1, only contains alpha characters & allows character to be deleted (allows null)
+        if (letter.length <= 1 && (validateString(letter) || letter === '')) {
             setRowWord(sortObject({...rowWord, [name]:letter.toUpperCase()}));  
-        }
+        } 
     }
     // Ensures word is compared correctly if it has been inputted in an irregaular way
     const sortObject = (obj) => {
@@ -82,6 +90,7 @@ const GamePage = (props) => {
             }
         }
         setGameOver(true);
+        setShowQuit(true)
     }
 
     const handleRowSubmit = (event) => {
@@ -156,10 +165,11 @@ const GamePage = (props) => {
         inputGrid.push(<form autoComplete='off' key={'form_'+i} id={'form_'+i} onSubmit={handleRowSubmit} className='row-form'>{inputRow}<input hidden key={'form_submit_'+i} type='submit'/></form>, <br/> );
     }
 
+    const [showQuit, setShowQuit] = useState(false);
     
     return (
         <div className='game-container'>
-        <Header />
+        <Header showQuit={showQuit} />
         <div className='game-grid'>
             {inputGrid}
         </div>

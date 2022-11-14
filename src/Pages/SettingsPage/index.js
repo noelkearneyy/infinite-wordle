@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Link, Route } from 'react-router-dom';
 import './index.css';
 
 const SettingsPage = (props) => {
 
     const [mainSettings, setMainSettings] = useState({
-        wordLength: 5,
-        tries: 6,
+        wordLength: '',
+        tries: '',
     });
 
     useEffect(() => {
-
+        setMainSettings(props.settings)
     },[])
         
     const handleInputChange = (event) => {
@@ -20,20 +21,21 @@ const SettingsPage = (props) => {
         setMainSettings({...mainSettings, [name]:value})
     }
 
-    const handleSettingsSubmit = (event) => {
-        event.preventDefault();
-        
-    }
+    // const handleSettingsSubmit = (event) => {
+    //     event.preventDefault();
+    //     window.location.href = '/'
+    //     props.setSettings(mainSettings)
+    // }
 
     return (
         <div className='settings-container'>
-            <h2 className='title'>SETTINGS</h2>
-                <form className='form' onSubmit={handleSettingsSubmit}>
+            <h1 className='title'>SETTINGS</h1>
+                <form className='form'>
                     <label className='bold'>WORD LENGTH: {mainSettings.wordLength} </label>
                     <input name='wordLength' value={mainSettings.wordLength} onChange={handleInputChange} type='range' min={3} max={8} /> 
                     <label className='bold'>TRIES: {mainSettings.tries} </label>
-                    <input name='tries' value={mainSettings.value} onChange={handleInputChange} type='range' min={3} max={8} /> 
-                    <input className='standard-btn' type='submit' value='SAVE' />
+                    <input name='tries' value={mainSettings.tries} onChange={handleInputChange} type='range' min={3} max={8} /> 
+                    <Link state={{ savedSettings: mainSettings }} to='/' className='standard-btn settings-btn' >SAVE</Link>
                 </form>
         </div>
     );
