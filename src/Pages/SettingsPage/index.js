@@ -1,18 +1,34 @@
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------------------------------------------------------------------
 import { useEffect, useState } from 'react';
-import { Link, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './index.css';
 
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// PARENT COMPONENT - SettingsPage
+// ----------------------------------------------------------------------------------------------------------------------------------------
 const SettingsPage = (props) => {
 
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// STATE
+// ----------------------------------------------------------------------------------------------------------------------------------------
+    // mainSettings State Object - used to store the previous/altered game settings within the SettingsPage
     const [mainSettings, setMainSettings] = useState({
         wordLength: '',
         tries: '',
     });
 
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// FUNCTIONS
+// ----------------------------------------------------------------------------------------------------------------------------------------
+    // useEffect hook is is executed on the initial component render and executed when the array dependancy changes (props.settings)
     useEffect(() => {
-        setMainSettings(props.settings)
-    },[])
+        // the settings current game settings are set to the mainSettings State Object
+        setMainSettings(props.settings);
+    },[props.settings]);
         
+    // handleInputChange - Function (event) - executes when the wordLength and tries input are altered, the mainSettings State Object is updated to reflect these changes 
     const handleInputChange = (event) => {
         const target = event.target;
         const name = target.name;
@@ -21,12 +37,9 @@ const SettingsPage = (props) => {
         setMainSettings({...mainSettings, [name]:value})
     }
 
-    // const handleSettingsSubmit = (event) => {
-    //     event.preventDefault();
-    //     window.location.href = '/'
-    //     props.setSettings(mainSettings)
-    // }
-
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// RETURN - JSX
+// ----------------------------------------------------------------------------------------------------------------------------------------
     return (
         <div className='settings-container'>
             <h1 className='title'>SETTINGS</h1>
@@ -35,6 +48,7 @@ const SettingsPage = (props) => {
                     <input name='wordLength' value={mainSettings.wordLength} onChange={handleInputChange} type='range' min={3} max={8} /> 
                     <label className='bold'>TRIES: {mainSettings.tries} </label>
                     <input name='tries' value={mainSettings.tries} onChange={handleInputChange} type='range' min={3} max={8} /> 
+                    {/*  */}
                     <Link state={{ savedSettings: mainSettings }} to='/' className='standard-btn settings-btn' >SAVE</Link>
                 </form>
         </div>
