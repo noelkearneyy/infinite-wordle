@@ -1,0 +1,29 @@
+.pop-up-container {
+    position: fixed;
+    min-height: 50%;
+    min-width: 100vw;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+}
+
+.pop-up-box {
+    /* position: fixed;
+    right: 45%;
+    top: 15%; */
+   
+    color: #FFF7D6;
+    background-color: #2F4550;
+    border-radius: 5%;
+    max-width: fit-content;
+    text-align: center;
+    /* margin-left: auto;
+    margin-right: auto; */
+}
+
+.pop-up-message {
+    padding: 0.25em 1.5em;
+    font-size: 70%;
+    opacity: 1;
+    margin: 0;
+}

@@ -45,10 +45,9 @@ const SettingsPage = (props) => {
             <h1 className='title'>SETTINGS</h1>
                 <form className='form'>
                     <label className='bold'>WORD LENGTH: {mainSettings.wordLength} </label>
-                    <input name='wordLength' value={mainSettings.wordLength} onChange={handleInputChange} type='range' min={3} max={8} /> 
+                    <input className='range-input' name='wordLength' value={mainSettings.wordLength} onChange={handleInputChange} type='range' min={3} max={8} /> 
                     <label className='bold'>TRIES: {mainSettings.tries} </label>
-                    <input name='tries' value={mainSettings.tries} onChange={handleInputChange} type='range' min={3} max={8} /> 
-                    {/*  */}
+                    <input className='range-input' name='tries' value={mainSettings.tries} onChange={handleInputChange} type='range' min={3} max={8} /> 
                     <Link state={{ savedSettings: mainSettings }} to='/' className='standard-btn settings-btn' >SAVE</Link>
                 </form>
         </div>

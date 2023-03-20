@@ -1,0 +1,36 @@
+.letter-grid {
+    justify-self: center;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    padding: 1em;
+    flex-wrap: wrap;
+    width: 40%;
+    gap: 0.5em;
+    margin-bottom: 0;
+}
+
+.alphabet {
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1em;
+    border: 2px solid #2F4550;
+    border-radius: 10px;
+    min-width: 4vw;
+    min-height: 4vw;
+    max-width: 4vw;
+    max-height: 4vh;
+}
+
+@media (max-width: 767px) {
+    .letter-grid {
+        width: 60%;
+    }
+
+    .alphabet {
+        padding: 1vw;
+    }
+}

@@ -1,16 +1,20 @@
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // IMPORTS
 // ----------------------------------------------------------------------------------------------------------------------------------------
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import LetterGrid from '../../Components/LetterGrid';
+import LetterGrid from '../../Components/Gamepage/LetterGrid';
+import PopUp from '../../Components/Gamepage/PopUp';
+import RainAnimation from '../../Components/Gamepage/RainAnimation';
 import './index.css';
-let randomWords = require('random-english-words');
+import ConfettiExplosion from 'react-confetti-explosion';
+import ALL_WORDS from '../../Components/Gamepage/Words'
+const randomWords = require('random-english-words');
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // PARENT COMPONENT - GamePage
 // ----------------------------------------------------------------------------------------------------------------------------------------
-const GamePage = (props) => {
+const GamePage = ({ settings }) => {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // STATE
@@ -27,14 +31,22 @@ const GamePage = (props) => {
     const [gameOver, setGameOver] = useState(false);
     // showQuit State Boolean defines when the Quit button is displayed - when the gameOver component is rendered, the quit button is hidden
     const [showQuit, setShowQuit] = useState(false);
+    // showConfetti State Boolean defines when the ConfettiExplosion component is displayed - when the user has won the game
+    const [showConfetti, setShowConfetti] = useState(false);
+    // showRain State Boolean defines when the RainAnimation component is displayed - when the user has lost the game
+    const [showRain, setShowRain] = useState(false);
 
+    const [popupDetails, setPopupDetails] = useState({
+        message: 'Enter a valid word', 
+        display: false,
+    });
+
+    const timer = useRef(null);
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // FUNCTIONS
 // ----------------------------------------------------------------------------------------------------------------------------------------
     // useEffect hook is executed on the initial render and when the dependency array changes (props.settings)
     useEffect(()=>{
-        // props.settings is set to the settings variable
-        let settings = props.settings;
         // settings.tries is converted to an Integer and set to the defaultTries variable
         let defaultTries = Number(settings.tries);
         // the random-english-words package is used to obtain a random english word. The minChars and maxChars keys are set to the wordLength in the settings object
@@ -54,8 +66,7 @@ const GamePage = (props) => {
 
         // wordDetails object create in the useEffect hook is set as the wordDetails State Object
         setWordDetails(wordDetails);
-
-    }, [props.settings])
+    }, [settings])
 
     // validateString - Function (str) - function takes a string parameter and returns boolean if the string only contains uppercase and lowercase letter characters
     const validateString = (str) => {
@@ -77,10 +88,15 @@ const GamePage = (props) => {
         let letter = target.value;
         
         // Validate letter length is 1, only contains alpha characters & allows character to be deleted (allows null)
-        if (letter.length === 1 && (validateString(letter) || letter === '')) {
+        if ((letter.length === 1 && validateString(letter)) || letter === '') {
             // setRowWord function updates the rowWord State Object with the input name key and the capitalised letter value
-            setRowWord(sortObject({...rowWord, [name]:letter.toUpperCase()}));  
-        } 
+            setRowWord(sortObject({...rowWord, [name]: letter.toUpperCase()}));  
+        }
+    }
+
+    const spellcheckEntry = (rowWord) => {
+        const wordStr = (Object.values(rowWord).join('')).toLowerCase();
+        return ALL_WORDS.includes(wordStr);
     }
 
     // handleRowSubmit - Function (event) - 
@@ -99,6 +115,24 @@ const GamePage = (props) => {
         // Empty object which will be used to store submitted letter and color 
         let usedLetters = {};
 
+        // Verify all fields are complete
+        if(Object.keys(rowWord).length < wordDetails.wordLength) {
+            setPopupDetails((prevState) => ({...prevState, message: 'Complete all fields', display: true}))
+            clearTimeout(timer.current);
+            return timer.current = setTimeout(() => {
+                setPopupDetails((prevState) => ({...prevState, message: '', display: false}))
+            }, 1500)
+        }
+
+        // Verify inputted word is a valid english word
+        if(!spellcheckEntry(rowWord)) {
+            setPopupDetails((prevState) => ({...prevState, message: 'Word not in list', display: true}))
+            clearTimeout(timer.current);
+            return timer.current = setTimeout(() => {
+                setPopupDetails((prevState) => ({...prevState, message: '', display: false}))
+            }, 1500)
+        }
+
         // Disable current row once analysed & activate next row Form 
         if(wordDetails.defaultTries !== (parseInt(tryNo)+1)) {
             let currentForm = document.getElementById('form_'+parseInt(tryNo));
@@ -112,6 +146,8 @@ const GamePage = (props) => {
             setRowWord({});
         } else if (wordDetails.defaultTries === (parseInt(tryNo)+1)) {
             handleGameOver(wordDetails);
+            setShowRain(true);
+            // Game lost 
         } 
 
             for (let i in rowWord) {
@@ -142,6 +178,7 @@ const GamePage = (props) => {
             // If all values of the usedLetters object are green the handleGameOver function is executed
             if(usedLettersValues.every(gameWon)) {
                 handleGameOver(wordDetails);
+                setShowConfetti(true);
             }
     
             // Increment number of tries by one
@@ -151,7 +188,7 @@ const GamePage = (props) => {
 
     // handleGameOver - Function (wordDetails) - 
     const handleGameOver = (wordDetails) => {
-        for(let i = 0; i<=wordDetails.defaultTries-1; i++) {
+        for (let i = 0; i<=wordDetails.defaultTries-1; i++) {
             let form = document.getElementById('form_'+(i));
             for (const inputField of form.children) {
                 inputField.setAttribute('disabled','');
@@ -161,54 +198,83 @@ const GamePage = (props) => {
         setShowQuit(true)
     }
 
+    const handleKeyDown = (event) => {
+        if(event.key === 'Enter') {
+            event.preventDefault();
+            console.log('hello')
+            handleRowSubmit(event)
+        }
+    }
+
  // ----------------------------------------------------------------------------------------------------------------------------------------   
     // Creating the game form grid (inputGrid)
-    const inputGrid = []
-    for(let i = 0; i <= wordDetails.defaultTries-1; i++) {
+    const generateInputGrid = () => {
+        const inputGrid = []
+        for(let i = 0; i <= wordDetails.defaultTries-1; i++) {
         const inputRow = [];
         for(let n = 0; n<=wordDetails.wordLength-1; n++) {
             if (i===0) {
-                inputRow.push(<input key={'input_'+i+'_'+n} id={'input_'+i+'_'+n} className='game-input' type='text' name={'input_'+i+'_'+n} value={rowWord['input_'+i+'_'+n]} onChange={handleInput} />);
+                inputRow.push(<input key={'input_'+i+'_'+n} id={'input_'+i+'_'+n} className='game-input' type='text' name={'input_'+i+'_'+n} value={rowWord['input_'+i+'_'+n]} onChange={handleInput} onKeyDown={handleKeyDown} />);
             } else {
-                inputRow.push(<input key={'input_'+i+'_'+n} id={'input_'+i+'_'+n} className='game-input' type='text' name={'input_'+i+'_'+n} value={rowWord['input_'+i+'_'+n]} onChange={handleInput} disabled />);
+                inputRow.push(<input key={'input_'+i+'_'+n} id={'input_'+i+'_'+n} className='game-input' type='text' name={'input_'+i+'_'+n} value={rowWord['input_'+i+'_'+n]} onChange={handleInput} onKeyDown={handleKeyDown} disabled />);
             }
         }
-        inputGrid.push(<form autoComplete='off' key={'form_'+i} id={'form_'+i} onSubmit={handleRowSubmit} className='row-form'>{inputRow}<input hidden key={'form_submit_'+i} type='submit'/></form>, <br/> );
+        inputGrid.push(<form autoComplete='off' key={'form_'+i} id={'form_'+i} onSubmit={handleRowSubmit} className='row-form'>{inputRow}<input hidden key={'form_submit_'+i} type='submit'/></form>);
+    }
+        return inputGrid;
     }
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // RETURN - JSX
 // ----------------------------------------------------------------------------------------------------------------------------------------
     return (
-        <div className='game-container'>
-        <Header showQuit={showQuit} />
-        <div className='game-grid'>
-            {inputGrid}
-        </div>
-          
-        { gameOver ? <GameOver tries={tries} word={wordDetails.wordString} /> : <LetterGrid submittedLetters={submittedLetters}  />}
-
-        </div>
-    )
-}
-
-// ----------------------------------------------------------------------------------------------------------------------------------------
-// CHILD COMPONENT - Header
-// ----------------------------------------------------------------------------------------------------------------------------------------
-const Header = (props) => {
-
-    useEffect(()=>{
-        if(props.showQuit) {
-            document.getElementById('quit-btn').style.visibility = 'hidden';
+        <>
+        { showConfetti && 
+            <div className='confetti-animation'>
+                <ConfettiExplosion 
+                            force={0.8}
+                            duration={3000}
+                            particleCount={250}
+                    />
+            </div>
         }
-    },[props.showQuit])
+        
+        {
+            showRain &&  <RainAnimation raindropNum={300} />
+        }
+        {     
+            popupDetails.display ?   
+                <PopUp message={popupDetails.message} timeout={popupDetails.timeout} />
+                : 
+                null
+        }        
+<main className='game-container'>             
+        {/* Header */}
+        <header className='header-row'> 
+            <div className='left-header'>
+                <Link id='quit-btn' className={`standard-btn header-btn ${(showQuit) ? 'hidden' : null}`} to='/'>HOME</Link>
+            </div>
+            <div className='center-header'>
+                <h1 className='title'>INFINITE WORDLE</h1>
+            </div>
+            <div className='right-header'>
+                <Link id='quit-btn' className={`standard-btn header-btn ${(showQuit) ? 'hidden' : null}`} to='/settings'>Settings</Link>
+            </div>
+        </header>  
     
-    return (
-        <div className='header-row'> 
-        <Link id='quit-btn' className='standard-btn header-btn' to='/'>QUIT</Link>
-            <h1 className='title  header-title'>CUSTOM WORDLE</h1>  
-        </div>  
-    );
+        {/* <Header showQuit={showQuit} /> */}
+        
+        {/* Input Grid */}
+        <section className='game-grid-container'>
+            { generateInputGrid() }
+        </section>
+
+        {/* <section>   */}
+        { gameOver ? <GameOver tries={tries} word={wordDetails.wordString} /> : <LetterGrid submittedLetters={submittedLetters}  />}
+        {/* </section> */}
+        </main>
+        </>
+    )
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
@@ -218,11 +284,13 @@ const GameOver = (props) => {
     
     return (
         <div className='gameover-container'>
-            <h1 className='title'>GAME COMPLETE</h1>
+            {/* <h1 className='title'>{props.gameStatus}</h1> */}
+            <h1 className='title'>Game Over</h1>
             <p><strong>WORD:</strong> { props.word.toUpperCase() } </p>
             <p><strong>TRIES:</strong> { props.tries } </p>
             <div className='btns-row'>
                 <Link className='standard-btn gameover-btn' to='/'>HOME</Link>
+                <Link className='standard-btn gameover-btn' to='/settings'>SETTINGS</Link>
             </div>
         </div>
     );
