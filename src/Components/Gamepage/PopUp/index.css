@@ -8,17 +8,12 @@
 }
 
 .pop-up-box {
-    /* position: fixed;
-    right: 45%;
-    top: 15%; */
-   
     color: #FFF7D6;
     background-color: #2F4550;
     border-radius: 5%;
     max-width: fit-content;
     text-align: center;
-    /* margin-left: auto;
-    margin-right: auto; */
+    z-index: 1000;
 }
 
 .pop-up-message {

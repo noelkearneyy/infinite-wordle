@@ -7,6 +7,7 @@ import GamePage from './Pages/GamePage';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import SettingsPage from './Pages/SettingsPage';
+import NotFound404 from './Pages/NotFound404';
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
       <Route path='/' element={<Homepage />} />
       <Route path='/settings' element={<SettingsPage settings={settings} />} />
       <Route path='/play' element={<GamePage settings={settings} />} />
+      <Route path='*' element={<NotFound404 />}/>
     </Routes>
   );
 }
