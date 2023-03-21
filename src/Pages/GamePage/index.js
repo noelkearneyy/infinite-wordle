@@ -197,14 +197,13 @@ const GamePage = ({ settings }) => {
             }
         }
         setGameOver(true);
-        setShowQuit(true)
+        setShowQuit(true);
     }
 
     const handleKeyDown = (event) => {
         if(event.key === 'Enter') {
             event.preventDefault();
-            console.log('hello')
-            handleRowSubmit(event)
+            handleRowSubmit(event);
         }
     }
 

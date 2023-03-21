@@ -7,10 +7,8 @@ const NotFound404 = () => {
         <>
         <RainAnimation raindropNum={300} />
         <div className='container'>
-            {/* <div className=''> */}
                 <h1 className='title'>404 Page Not Found</h1>
                 <Link className='standard-btn' to='/'>HOME</Link>
-            {/* </div> */}
         </div>
         </>
     );

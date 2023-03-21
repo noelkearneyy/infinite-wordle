@@ -1,6 +1,6 @@
 import './index.css';
 
-const PopUp = ({ message, timeout }) => {
+const PopUp = ({ message }) => {
     return (
         <div className='pop-up-container'>
                 <div className='pop-up-box'>
