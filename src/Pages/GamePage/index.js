@@ -144,11 +144,7 @@ const GamePage = ({ settings }) => {
                 inputField.setAttribute('disabled','');
             }
             setRowWord({});
-        } else if (wordDetails.defaultTries === (parseInt(tryNo)+1)) {
-            handleGameOver(wordDetails);
-            setShowRain(true);
-            // Game lost 
-        } 
+        }
 
             for (let i in rowWord) {
                 submittedWord.push(rowWord[i]);
@@ -180,6 +176,12 @@ const GamePage = ({ settings }) => {
                 handleGameOver(wordDetails);
                 setShowConfetti(true);
             }
+
+            if (wordDetails.defaultTries === (parseInt(tryNo)+1) && !usedLettersValues.every(gameWon)) {
+                handleGameOver(wordDetails);
+                setShowRain(true);
+                // Game lost 
+            } 
     
             // Increment number of tries by one
             setTries(tries+1)
