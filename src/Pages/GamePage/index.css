@@ -69,6 +69,10 @@
     font-weight: bold;
     color: #2F4550;
     font-size: 1em;
+    background-color: white;
+
+    display: grid;
+    align-content: center;
 }
 
 .confetti-animation{

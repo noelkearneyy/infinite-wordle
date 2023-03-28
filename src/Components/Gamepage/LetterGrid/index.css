@@ -1,3 +1,23 @@
+.letter-grid-container {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: min-content auto min-content;
+}
+
+.letter-grid-btn {
+    color: white;
+    font-weight: bold;
+    font-size: 1em;
+    cursor: pointer;
+    border: 2px solid #2F4550;
+    border-radius: 10px;
+    margin: 1em;
+    min-width: 6vw;
+    min-height: 60%;
+    max-width: 6vw;
+    max-height: 60%;
+}
+
 .letter-grid {
     justify-self: center;
     display: flex;
@@ -23,6 +43,7 @@
     min-height: 4vw;
     max-width: 4vw;
     max-height: 4vh;
+    cursor: pointer;
 }
 
 @media (max-width: 767px) {

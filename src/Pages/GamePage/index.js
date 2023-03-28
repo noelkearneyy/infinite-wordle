@@ -8,6 +8,9 @@ import PopUp from '../../Components/Gamepage/PopUp';
 import RainAnimation from '../../Components/Gamepage/RainAnimation';
 import './index.css';
 import ConfettiExplosion from 'react-confetti-explosion';
+
+
+
 import ALL_WORDS from '../../Components/Gamepage/Words'
 const randomWords = require('random-english-words');
 
@@ -66,6 +69,16 @@ const GamePage = ({ settings }) => {
 
         // wordDetails object create in the useEffect hook is set as the wordDetails State Object
         setWordDetails(wordDetails);
+
+        //create key/values pairs for rowWords state for controlled inputs 
+        let rowDetails = {};
+        for(let tries=1; tries <=  settings.tries; tries++) {
+            for(let letter=1; letter <= settings.wordLength; letter++) {
+                rowDetails = {...rowDetails, [`input_${tries}_${letter}`]: ''}
+            }
+        }
+        console.log(rowDetails);
+        setRowWord(rowDetails);
     }, [settings])
 
     // validateString - Function (str) - function takes a string parameter and returns boolean if the string only contains uppercase and lowercase letter characters
@@ -210,7 +223,7 @@ const GamePage = ({ settings }) => {
  // ----------------------------------------------------------------------------------------------------------------------------------------   
     // Creating the game form grid (inputGrid)
     const generateInputGrid = () => {
-        const inputGrid = []
+        const inputGrid = [];
         for(let i = 0; i <= wordDetails.defaultTries-1; i++) {
         const inputRow = [];
         for(let n = 0; n<=wordDetails.wordLength-1; n++) {
@@ -222,6 +235,18 @@ const GamePage = ({ settings }) => {
         }
         inputGrid.push(<form autoComplete='off' key={'form_'+i} id={'form_'+i} onSubmit={handleRowSubmit} className='row-form'>{inputRow}<input hidden key={'form_submit_'+i} type='submit'/></form>);
     }
+        return inputGrid;
+    }
+
+    const generateGrid = () => {
+        const inputGrid = [];
+        for(let tries=1; tries <= wordDetails.defaultTries; tries++) {
+            const inputRow = [];
+            for(let letter=1; letter<=wordDetails.wordLength; letter++) {
+                inputRow.push(<div className='game-input'>{rowWord[`input_${tries}_${letter}`]}</div>)
+            }
+            inputGrid.push(<div className='row-form'>{inputRow}</div>);
+        }
         return inputGrid;
     }
 
@@ -263,11 +288,12 @@ const GamePage = ({ settings }) => {
             </div>
         </header>  
     
-        {/* <Header showQuit={showQuit} /> */}
-        
         {/* Input Grid */}
         <section className='game-grid-container'>
-            { generateInputGrid() }
+            {/* { generateInputGrid() } */}
+           {
+            <GameGrid wordLength={wordDetails.wordLength} totalTries={wordDetails.defaultTries} rowWord={rowWord} />
+           }
         </section>
 
         {/* <section>   */}
@@ -279,16 +305,38 @@ const GamePage = ({ settings }) => {
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
+// CHILD COMPONENT - GameGrid
+// ----------------------------------------------------------------------------------------------------------------------------------------
+
+const GameGrid = ({ wordLength, totalTries, rowWord }) => {
+
+    const handleKeyDown = (event) => {
+        console.log(event.key)
+    }
+
+    const inputGrid = [];
+    for(let tries=1; tries <= totalTries; tries++) {
+        const inputRow = [];
+        for(let letter=1; letter<=wordLength; letter++) {
+            inputRow.push(<div className='game-input' onKeyDown={handleKeyDown}>{rowWord[`input_${tries}_${letter}`]}</div>)
+        }
+        inputGrid.push(<div className='row-form'>{inputRow}</div>);
+    }
+    return inputGrid;
+
+}
+
+// ----------------------------------------------------------------------------------------------------------------------------------------
 // CHILD COMPONENT - GameOver
 // ----------------------------------------------------------------------------------------------------------------------------------------
-const GameOver = (props) => {
+const GameOver = ({ word, tries }) => {
     
     return (
         <div className='gameover-container'>
             {/* <h1 className='title'>{props.gameStatus}</h1> */}
             <h1 className='title'>Game Over</h1>
-            <p><strong>WORD:</strong> { props.word.toUpperCase() } </p>
-            <p><strong>TRIES:</strong> { props.tries } </p>
+            <p><strong>WORD:</strong> { word.toUpperCase() } </p>
+            <p><strong>TRIES:</strong> { tries } </p>
             <div className='btns-row'>
                 <Link className='standard-btn gameover-btn' to='/'>HOME</Link>
                 <Link className='standard-btn gameover-btn' to='/settings'>SETTINGS</Link>
@@ -296,5 +344,7 @@ const GameOver = (props) => {
         </div>
     );
 }
+
+
 
 export default GamePage;

@@ -6,17 +6,22 @@ const LetterGrid = ({submittedLetters}) => {
     const [listSubmittedLetters, setListSubmittedLetters] = useState({});
 
     useEffect(()=>{
-        let alphabet = 'abcdefghijklmnopqrstuvwxyz';
+        let alphabet = 'qwertyuiopasdfghjklzxcvbnm';
         alphabet = alphabet.toUpperCase().split('');
         setAlphabet(alphabet);
 
         setListSubmittedLetters(submittedLetters);
         
-    },[submittedLetters])
+    },[submittedLetters]);
+
+    const handleClick = (event) => {
+        const letter = event.target.id.split('_')[1];
+        console.log(letter);
+    }
 
     const letterElements = [];
     for(let i=0; i<=alphabet.length-1; i++) {
-        letterElements.push(<div key={'letter_'+alphabet[i]} id={'letter_'+alphabet[i]} className='alphabet'>{alphabet[i]}</div>);
+        letterElements.push(<div key={'letter_'+alphabet[i]} id={'letter_'+alphabet[i]} className='alphabet' onClick={handleClick}>{alphabet[i]}</div>);
     }
 
     //key form and value is an object
@@ -28,9 +33,21 @@ const LetterGrid = ({submittedLetters}) => {
     }
     
     return (
-        <div className='letter-grid'>
-            {letterElements}
+        <div className='letter-grid-container'>
+
+        <div className='letter-grid-btn'>
+            <p>Enter</p>
+            <i class="fa-solid fa-arrow-turn-down" style={{transform: 'rotate(90deg)'}}></i>
         </div>
+       
+        <div className='letter-grid'>
+                {letterElements}
+        </div>
+
+        <div className='letter-grid-btn'><i class="fa-solid fa-delete-left"></i></div>
+        
+        </div>
+        
     );
 }
 

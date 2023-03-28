@@ -149,7 +149,8 @@ const ALL_WORDS = [ //credit VOA special words
  'wide', 'wife', 'wild', 'will', 'willing', 'win', 'wind', 'window', 'winter', 'wire',
  'wise', 'wish', 'with', 'withdraw', 'without', 'witness', 'woman', 'wonder', 'wonderful', 'wood',
  'word', 'work', 'world', 'worry', 'worse', 'worth', 'wound', 'wreck', 'wreckage', 'write',
- 'wrong', 'year', 'yellow', 'yes', 'yesterday', 'yet', 'you', 'young', 'zero', 'zoo'
+ 'wrong', 'year', 'yellow', 'yes', 'yesterday', 'yet', 'you', 'young', 'zero', 'zoo', 
+ 
 ]; 
 
 export default ALL_WORDS;
