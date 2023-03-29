@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './index.css';
 
-const LetterGrid = ({submittedLetters}) => {
+const LetterGrid = ({ submittedLetters, rowWord, setRowWord, tries, setTries, currentCell, setCurrentCell, rows, inputs, handleRowSubmit, changeCurrentCell }) => {
     const [alphabet, setAlphabet] = useState([]);
     const [listSubmittedLetters, setListSubmittedLetters] = useState({});
 
@@ -15,8 +15,25 @@ const LetterGrid = ({submittedLetters}) => {
     },[submittedLetters]);
 
     const handleClick = (event) => {
-        const letter = event.target.id.split('_')[1];
-        console.log(letter);
+    
+        switch(event.target.id) {
+            case 'ENTER': 
+                handleRowSubmit();
+                break;
+            
+            case 'DELETE':
+                setRowWord((prevState) => ({...prevState, [currentCell]: ''}));
+                const prevIndex = changeCurrentCell(rowWord, currentCell, tries, 'prev');
+                setCurrentCell(Object.keys(rowWord)[prevIndex]);
+                break;
+            
+            default:
+                const letter = event.target.id.split('_')[1];
+                setRowWord((prevState) => ({...prevState, [currentCell]: letter}));
+                const nextIndex = changeCurrentCell(rowWord, currentCell, tries, 'next');
+                setCurrentCell(Object.keys(rowWord)[nextIndex]);
+                break;
+        }
     }
 
     const letterElements = [];
@@ -35,16 +52,19 @@ const LetterGrid = ({submittedLetters}) => {
     return (
         <div className='letter-grid-container'>
 
-        <div className='letter-grid-btn'>
-            <p>Enter</p>
-            <i class="fa-solid fa-arrow-turn-down" style={{transform: 'rotate(90deg)'}}></i>
+        <div className='letter-grid-btn' onClick={handleClick} id="ENTER">
+            <p id="ENTER">Enter</p>
+            <i id="ENTER" className="fa-solid fa-arrow-turn-down" style={{transform: 'rotate(90deg)'}}></i>
         </div>
        
         <div className='letter-grid'>
-                {letterElements}
+            {letterElements}
         </div>
 
-        <div className='letter-grid-btn'><i class="fa-solid fa-delete-left"></i></div>
+        <div className='letter-grid-btn' onClick={handleClick} id="DELETE">
+            <p id="DELETE">Delete</p>
+            <i id="DELETE" className="fa-solid fa-delete-left"></i>
+        </div>
         
         </div>
         

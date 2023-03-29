@@ -4,19 +4,18 @@
 
 .game-container {
     display: grid;
-    grid-template-rows: min-content max-content max-content;
+    grid-template-rows: max-content max-content;
     overflow: hidden;
     align-content: center;
     overflow: scroll;
-    min-height: 100vh;
 }
 
 .header-row {
     min-width: 40%;
     max-width: 100vw;
     padding: 10px;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-auto-flow: column;
     align-items: center;
     margin: 0 auto;
 }
@@ -24,6 +23,7 @@
 .center-header {
     margin: 1%;
     text-align: center;
+    justify-self: center;
 }
 
 .left-header,
@@ -70,9 +70,18 @@
     color: #2F4550;
     font-size: 1em;
     background-color: white;
+    border: 2px solid white;
 
     display: grid;
     align-content: center;
+}
+
+.activeCell {
+    border: 2px solid #2F4550;
+}
+
+.disabled {
+    opacity: 0.5;
 }
 
 .confetti-animation{
@@ -89,6 +98,11 @@
 
 .hidden {
     display: none;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: center;
 }
 
 .gameover-container {
