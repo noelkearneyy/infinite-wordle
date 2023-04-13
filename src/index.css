@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rochester&family=Rubik+Bubbles&family=Source+Code+Pro:wght@900&display=swap');
 
 html {
-  /* overflow: hidden; */
   height: 100%;
 }
 
@@ -24,6 +23,3 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
-
-/* * { border: 1px solid red !important; } */

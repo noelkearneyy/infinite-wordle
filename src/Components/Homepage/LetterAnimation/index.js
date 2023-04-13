@@ -33,7 +33,6 @@ const LetterAnimation = () => {
         }, 500);
     }
 
-
     return (
         <div ref={container} className='letter-animation-container' onClick={handleClick}>
             {

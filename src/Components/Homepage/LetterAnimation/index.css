@@ -16,7 +16,7 @@
 .letter {
     font-family: 'Source Code Pro', monospace;
     font-family: 'Rubik Bubbles', cursive;
-    font-size: 8em;
+    font-size: 16vw;
     color: #FFF7D6;
     display: inline-block;
     position: fixed;

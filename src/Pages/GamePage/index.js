@@ -10,12 +10,14 @@ import './index.css';
 import ConfettiExplosion from 'react-confetti-explosion';
 
 import ALL_WORDS from '../../Components/Gamepage/Words'
-const randomWords = require('random-english-words');
+var randomWords = require('random-words');
+
+// var randomWords = require('an-array-of-english-words');
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // PARENT COMPONENT - GamePage
 // ----------------------------------------------------------------------------------------------------------------------------------------
-const GamePage = ({ settings }) => {
+const GamePage = ({ settings, setSettings }) => {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // STATE
@@ -32,8 +34,6 @@ const GamePage = ({ settings }) => {
     const [currentCell, setCurrentCell] = useState('');
     // gameOver State Boolean defines when the gameOver component is shown and hides the letter grid
     const [gameOver, setGameOver] = useState(false);
-    // showQuit State Boolean defines when the Quit button is displayed - when the gameOver component is rendered, the quit button is hidden
-    const [showQuit, setShowQuit] = useState(false);
     // showConfetti State Boolean defines when the ConfettiExplosion component is displayed - when the user has won the game
     const [showConfetti, setShowConfetti] = useState(false);
     // showRain State Boolean defines when the RainAnimation component is displayed - when the user has lost the game
@@ -47,15 +47,30 @@ const GamePage = ({ settings }) => {
     const timer = useRef(null);
     const rows = useRef([]);
     const inputs = useRef([]);
+    const lettersRef = useRef([]);
+    const container = useRef(null);
+
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // FUNCTIONS
 // ----------------------------------------------------------------------------------------------------------------------------------------
+    const getRandomWord = (wordLength) => {
+        // const filteredWords = randomWords.filter((word)=> new RegExp(`^.{${wordLength}}$`).test(word));
+        // const randomIndex = Math.floor(Math.random() * filteredWords.length);
+        // return filteredWords[randomIndex];
+
+        let randomWord = randomWords({exactly: 1, maxLength: wordLength})
+        while(randomWord[0].length < wordLength) {
+            randomWord = randomWords({exactly: 1, maxLength: wordLength})
+        }
+        return randomWord[0];
+    }
+
     // useEffect hook is executed on the initial render and when the dependency array changes (props.settings)
     useEffect(()=>{
         // settings.tries is converted to an Integer and set to the defaultTries variable
         let defaultTries = Number(settings.tries);
         // the random-english-words package is used to obtain a random english word. The minChars and maxChars keys are set to the wordLength in the settings object
-        let randomWordString = randomWords({minCount: 1, minChars: Number(settings.wordLength), maxChars: Number(settings.wordLength)})
+        const randomWordString = getRandomWord(Number(settings.wordLength));
         // the length of the randomWordString variable
         let wordLength = randomWordString.length;
         // the randomWordLength variable is set to uppercase and each letter is split into an array - used for analysing player input
@@ -83,7 +98,21 @@ const GamePage = ({ settings }) => {
         setRowWord(rowDetails);
         setCurrentCell(Object.keys(rowDetails)[0]);
 
-    }, [settings])
+    }, [settings]);
+
+    const handleKeyUp = (event) => {
+        if(validateString(event.key) && event.key.length === 1) {
+            setRowWord((prevState) => ({...prevState, [currentCell]: event.key.toUpperCase()}));
+            const nextIndex = changeCurrentCell(rowWord, currentCell, tries, 'next');
+            setCurrentCell(Object.keys(rowWord)[nextIndex]);
+        } else if (event.key === 'Enter') {
+            handleRowSubmit();
+        } else if (event.key === 'Backspace') {
+            setRowWord((prevState) => ({...prevState, [currentCell]: ''}));
+            const prevIndex = changeCurrentCell(rowWord, currentCell, tries, 'prev');
+            setCurrentCell(Object.keys(rowWord)[prevIndex]);
+        }
+    }
 
     // validateString - Function (str) - function takes a string parameter and returns boolean if the string only contains uppercase and lowercase letter characters
     const validateString = (str) => {
@@ -98,131 +127,9 @@ const GamePage = ({ settings }) => {
         }, {})
     }
 
-    // handleInput - Function (event) - validates player input and updates rowWord State Object
-    const handleInput = (event) => {
-        const target = event.target;
-        const name = target.name;
-        let letter = target.value;
-        
-        // Validate letter length is 1, only contains alpha characters & allows character to be deleted (allows null)
-        if ((letter.length === 1 && validateString(letter)) || letter === '') {
-            // setRowWord function updates the rowWord State Object with the input name key and the capitalised letter value
-            setRowWord(sortObject({...rowWord, [name]: letter.toUpperCase()}));  
-        }
-    }
-
     const spellcheckEntry = (rowWord) => {
         const wordStr = (Object.values(rowWord).join('')).toLowerCase();
         return ALL_WORDS.includes(wordStr);
-    }
-
-    // handleRowSubmit - Function (event) - 
-    const handleRowsSubmit = (event) => {
-        event.preventDefault();
-
-        // id of submitted row/form
-        let formId = event.target.id;
-        
-        // the current try number 
-        let tryNo = formId.split('_')[1];
-        
-        // Empty array which will be used to store submitted letters
-        let submittedWord = [];
-
-        // Empty object which will be used to store submitted letter and color 
-        let usedLetters = {};
-
-        // Verify all fields are complete
-        if(Object.keys(rowWord).length < wordDetails.wordLength) {
-            setPopupDetails((prevState) => ({...prevState, message: 'Complete all fields', display: true}))
-            clearTimeout(timer.current);
-            return timer.current = setTimeout(() => {
-                setPopupDetails((prevState) => ({...prevState, message: '', display: false}))
-            }, 1500)
-        }
-
-        // Verify inputted word is a valid english word
-        if(!spellcheckEntry(rowWord)) {
-            setPopupDetails((prevState) => ({...prevState, message: 'Word not in list', display: true}))
-            clearTimeout(timer.current);
-            return timer.current = setTimeout(() => {
-                setPopupDetails((prevState) => ({...prevState, message: '', display: false}))
-            }, 1500)
-        }
-
-        // Disable current row once analysed & activate next row Form 
-        if(wordDetails.defaultTries !== (parseInt(tryNo)+1)) {
-            let currentForm = document.getElementById('form_'+parseInt(tryNo));
-            let nextForm = document.getElementById('form_'+(parseInt(tryNo)+1));
-            for (const inputField of nextForm.children) {
-                inputField.removeAttribute('disabled');
-            }
-            for (const inputField of currentForm.children) {
-                inputField.setAttribute('disabled','');
-            }
-            setRowWord({});
-        }
-
-            for (let i in rowWord) {
-                submittedWord.push(rowWord[i]);
-            }
-    
-            //Analysis and compare input with word
-            for (let i = 0; i <= wordDetails.wordLength-1; i++) {
-                let inputFieldId = 'input_'+tryNo+'_'+i;
-                let inputField = document.getElementById(inputFieldId);
-                if (wordDetails.wordSplit[i] === submittedWord[i]) {
-                    inputField.style.backgroundColor = 'green';
-                    usedLetters[submittedWord[i]] = 'green';
-                } else if (wordDetails.wordSplit[i] !== submittedWord[i] && wordDetails.wordSplit.includes(submittedWord[i])) {
-                    inputField.style.backgroundColor = 'orange';
-                    usedLetters[submittedWord[i]] = 'orange';
-                } else {
-                    inputField.style.backgroundColor = 'gray';
-                    usedLetters[submittedWord[i]] = 'gray';
-                }
-            }
-    
-            setSubmittedLetters({...submittedLetters, [formId]:usedLetters});
-    
-            // Once game has been won, the values of the used letters are obtained  
-            let usedLettersValues = Object.values(usedLetters);
-            const gameWon = (value) => value === 'green';
-            
-            // If all values of the usedLetters object are green the handleGameOver function is executed
-            if(usedLettersValues.every(gameWon)) {
-                handleGameOver(wordDetails);
-                setShowConfetti(true);
-            }
-
-            if (wordDetails.defaultTries === (parseInt(tryNo)+1) && !usedLettersValues.every(gameWon)) {
-                handleGameOver(wordDetails);
-                setShowRain(true);
-                // Game lost 
-            } 
-    
-            // Increment number of tries by one
-            setTries(tries+1)
-        
-    }
-
-    // handleGameOver - Function (wordDetails) - 
-    const handleGameOver = (wordDetails) => {
-        for (let i = 0; i<=wordDetails.defaultTries-1; i++) {
-            let form = document.getElementById('form_'+(i));
-            for (const inputField of form.children) {
-                inputField.setAttribute('disabled','');
-            }
-        }
-        setGameOver(true);
-        setShowQuit(true);
-    }
-
-    const handleKeyDown = (event) => {
-        if(event.key === 'Enter') {
-            event.preventDefault();
-            handleRowSubmit(event);
-        }
     }
 
     const changeCurrentCell = (obj, currentCell, tries, direction='next') => {
@@ -245,23 +152,27 @@ const GamePage = ({ settings }) => {
         return currentIndex;
     }
 
-    const handleRowSubmit = () => {
-        // tries = row number 
 
+    const handleRowSubmit = () => {
+        // Store the submitted word based on the current value of tries variable in the submittedWord object
         let submittedWord = {}
-        
         for(const input in rowWord) {
             const rowNumber = input.split('_')[1];
             if(tries === Number(rowNumber)) {
                submittedWord = {...submittedWord, [input]: rowWord[input]}
-                }
+                } 
             }
         
-        // Validate for incomplete inputs
+        // Validate for incomplete inputs][]
         if(Object.values(submittedWord).includes('')) {
-            return console.log('Incomplete word');
+            setPopupDetails((prevState) => ({...prevState, message: 'Complete all fields', display: true}));
+            clearTimeout(timer.current);
+            return timer.current = setTimeout(() => {
+                setPopupDetails((prevState) => ({...prevState, message: '', display: false}));
+            }, 1500);
         }
 
+        let submittedWordColors = [];
         for(let i = 0; i <= wordDetails.wordLength-1; i++) {
             const submittedWordValues = Object.values(submittedWord);
             const submittedWordKeys = Object.keys(submittedWord);
@@ -276,26 +187,51 @@ const GamePage = ({ settings }) => {
 
             for(const input of inputs.current) {
                 if(input.id === submittedWordKeys[i]) {
-                    input.style.backgroundColor = color;
-                    input.style.border = '2px solid #2F4550';
+                        input.style.animation = 'rotateY 2s linear';
+                        input.children[0].style.animation = 'rotateY 2s linear';
+
+                    setTimeout(() => {
+                        input.style.backgroundColor = color;
+                        input.style.border = '2px solid #2F4550';
+                    }, 1000)
+                }
+            } 
+
+            for(const letterElement of lettersRef.current) {
+                const letter = letterElement.id.split('_')[1];
+                if(letter === submittedWordValues[i]) {
+                    letterElement.style.backgroundColor = color;
                 }
             }
+            submittedWordColors.push(color);
         }
 
-        
+        // check if all inputs are correct then the game is won
+        if(submittedWordColors.every((letter) => letter === 'green')) {
+            setGameOver(true);
+            return setShowConfetti(true);
+        }
 
-        if(tries+1 <= wordDetails.defaultTries) {
-            setTries((prevState) => (prevState+1))
-            const nextIndex = changeCurrentCell(rowWord, currentCell, tries+1, 'next');
-            const nextInput = Object.keys(rowWord)[nextIndex];
-            setCurrentCell(nextInput);
+
+        // check if last try and if all inputs are not correct game is lost
+        if(tries === wordDetails.defaultTries && !(submittedWordColors.every((letter) => letter === 'green'))) {
+            setGameOver(true);
+            return setShowRain(true);
+        }
+
+
+        if(tries+1 <= wordDetails.defaultTries ) {
+            setTimeout(()=>{
+                setTries((prevState) => (prevState+1))
+                const nextIndex = changeCurrentCell(rowWord, currentCell, tries+1, 'next');
+                const nextInput = Object.keys(rowWord)[nextIndex];
+                setCurrentCell(nextInput);
+            }, 2000);
+
         } else {
             setGameOver(true);
         }
-        
-
-        // Game won & Game lost
-
+    
         }
     
 
@@ -303,8 +239,9 @@ const GamePage = ({ settings }) => {
 // RETURN - JSX
 // ----------------------------------------------------------------------------------------------------------------------------------------
     return (
-        <>
-        { showConfetti && 
+        <div className='game-page-container' tabIndex={0} ref={container} onKeyUp={handleKeyUp}>
+        { 
+        showConfetti && 
             <div className='confetti-animation'>
                 <ConfettiExplosion 
                             force={0.8}
@@ -313,17 +250,17 @@ const GamePage = ({ settings }) => {
                     />
             </div>
         }
-        
+
         {
             showRain &&  <RainAnimation raindropNum={300} />
         }
+
         {     
             popupDetails.display ?   
                 <PopUp message={popupDetails.message} timeout={popupDetails.timeout} />
                 : 
                 null
         } 
-        {/* Header */}
         <header className='header-row'> 
         {
             (!gameOver) && 
@@ -347,15 +284,15 @@ const GamePage = ({ settings }) => {
     <main className='game-container'>             
         <section className='game-grid-container'>
            {
-            <GameGrid wordLength={wordDetails.wordLength} totalTries={wordDetails.defaultTries} currentTries={tries} rowWord={rowWord} currentCell={currentCell} rows={rows} inputs={inputs}/>
+            <GameGrid wordLength={wordDetails.wordLength} totalTries={wordDetails.defaultTries} currentTries={tries} rowWord={rowWord} currentCell={currentCell} rows={rows} inputs={inputs} gameOver={gameOver} />
            }
         </section>
 
         <section className='footer-container'>  
-        { gameOver ? <GameOver tries={tries} word={wordDetails.wordString} totalTries={wordDetails.defaultTries} /> : <LetterGrid submittedLetters={submittedLetters} rowWord={rowWord} setRowWord={setRowWord} tries={tries} setTries={setTries} currentCell={currentCell} setCurrentCell={setCurrentCell} rows={rows} inputs={inputs} handleRowSubmit={handleRowSubmit} changeCurrentCell={changeCurrentCell}/>}
+        { gameOver ? <GameOver tries={tries} word={wordDetails.wordString} totalTries={wordDetails.defaultTries} setSettings={setSettings} setGameOver={setGameOver} /> : <LetterGrid lettersRef={lettersRef} submittedLetters={submittedLetters} rowWord={rowWord} setRowWord={setRowWord} tries={tries} setTries={setTries} currentCell={currentCell} setCurrentCell={setCurrentCell} rows={rows} inputs={inputs} handleRowSubmit={handleRowSubmit} changeCurrentCell={changeCurrentCell}/>}
         </section>
     </main>
-        </>
+        </div>
     )
 }
 
@@ -363,11 +300,7 @@ const GamePage = ({ settings }) => {
 // CHILD COMPONENT - GameGrid
 // ----------------------------------------------------------------------------------------------------------------------------------------
 
-const GameGrid = ({ wordLength, totalTries, currentTries, rowWord, currentCell, rows, inputs }) => {
-
-    const handleKeyDown = (event) => {
-        console.log(event.key)
-    }
+const GameGrid = ({ wordLength, totalTries, currentTries, rowWord, currentCell, rows, inputs, gameOver }) => {
 
     const addToInputs = (element) => {
         if(element && !inputs.current.includes(element)) {
@@ -385,7 +318,7 @@ const GameGrid = ({ wordLength, totalTries, currentTries, rowWord, currentCell, 
     for(let tries=1; tries <= totalTries; tries++) {
         const inputRow = [];
         for(let letter=1; letter<=wordLength; letter++) {
-            inputRow.push(<div ref={addToInputs} id={`input_${tries}_${letter}`} className={`game-input ${(currentTries === tries) ? '' : 'disabled'} ${(currentCell === `input_${tries}_${letter}`) ? 'activeCell' : ''}`}>{rowWord[`input_${tries}_${letter}`]}</div>)
+            inputRow.push(<div ref={addToInputs} id={`input_${tries}_${letter}`} className={`game-input ${(currentTries === tries || gameOver === true) ? '' : 'disabled'} ${(currentCell === `input_${tries}_${letter}`) ? 'activeCell' : ''}`}><p>{rowWord[`input_${tries}_${letter}`]}</p></div>)
         }
         inputGrid.push(<div ref={addToRows} className='row-form'>{inputRow}</div>);
     }
@@ -396,17 +329,17 @@ const GameGrid = ({ wordLength, totalTries, currentTries, rowWord, currentCell, 
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // CHILD COMPONENT - GameOver
 // ----------------------------------------------------------------------------------------------------------------------------------------
-const GameOver = ({ word, tries, totalTries }) => {
-    
+const GameOver = ({ word, tries, totalTries, setSettings, setGameOver }) => {
     return (
         <div className='gameover-container'>
             {/* <h1 className='title'>{props.gameStatus}</h1> */}
-            <h1 className='title'>Game Over</h1>
-            <p><strong>WORD:</strong> { word.toUpperCase() } </p>
-            <p><strong>TRIES:</strong> {`${tries}/${totalTries}`} </p>
+                <h1 className='title'>Game Over</h1>
+                <p><strong>WORD:</strong> { word.toUpperCase() } </p>
+                <p><strong>TRIES:</strong> {`${tries}/${totalTries}`} </p>
+            
             <div className='btns-row'>
                 <Link className='standard-btn gameover-btn' to='/'>HOME</Link>
-                <Link className='standard-btn gameover-btn' to='/settings'>SETTINGS</Link>
+                <Link className='standard-btn' to='/settings'>SETTINGS</Link>
             </div>
         </div>
     );

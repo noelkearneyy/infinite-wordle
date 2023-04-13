@@ -1,9 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './index.css';
 
-const LetterGrid = ({ submittedLetters, rowWord, setRowWord, tries, setTries, currentCell, setCurrentCell, rows, inputs, handleRowSubmit, changeCurrentCell }) => {
+const LetterGrid = ({ lettersRef, submittedLetters, rowWord, setRowWord, tries, setTries, currentCell, setCurrentCell, rows, inputs, handleRowSubmit, changeCurrentCell }) => {
     const [alphabet, setAlphabet] = useState([]);
     const [listSubmittedLetters, setListSubmittedLetters] = useState({});
+
+    const addToLetters = (element) => {
+        if(element && !lettersRef.current.includes(element)) {
+            lettersRef.current.push(element);
+        }
+    }
 
     useEffect(()=>{
         let alphabet = 'qwertyuiopasdfghjklzxcvbnm';
@@ -38,7 +44,7 @@ const LetterGrid = ({ submittedLetters, rowWord, setRowWord, tries, setTries, cu
 
     const letterElements = [];
     for(let i=0; i<=alphabet.length-1; i++) {
-        letterElements.push(<div key={'letter_'+alphabet[i]} id={'letter_'+alphabet[i]} className='alphabet' onClick={handleClick}>{alphabet[i]}</div>);
+        letterElements.push(<div key={'letter_'+alphabet[i]} ref={addToLetters} id={'letter_'+alphabet[i]} className='alphabet' onClick={handleClick}>{alphabet[i]}</div>);
     }
 
     //key form and value is an object
@@ -52,18 +58,22 @@ const LetterGrid = ({ submittedLetters, rowWord, setRowWord, tries, setTries, cu
     return (
         <div className='letter-grid-container'>
 
-        <div className='letter-grid-btn' onClick={handleClick} id="ENTER">
+        <div>
+            <div className='letter-grid-btn' onClick={handleClick} id="ENTER">
             <p id="ENTER">Enter</p>
             <i id="ENTER" className="fa-solid fa-arrow-turn-down" style={{transform: 'rotate(90deg)'}}></i>
+            </div>
         </div>
        
         <div className='letter-grid'>
             {letterElements}
         </div>
 
+        <div>
         <div className='letter-grid-btn' onClick={handleClick} id="DELETE">
             <p id="DELETE">Delete</p>
             <i id="DELETE" className="fa-solid fa-delete-left"></i>
+        </div>
         </div>
         
         </div>

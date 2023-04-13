@@ -1,33 +1,21 @@
 .letter-grid-container {
-    /* justify-self: center; */
-    grid-template-columns: auto min-content auto;
     display: grid;
+    grid-template-columns: min-content min-content min-content;
     grid-auto-flow: column;
     justify-content: center;
-    max-width: 70%;
-    padding: 1em;
-    /* border: 1px solid red; */
-
-}
-
-.letter-grid-container * {
-    /* border: 1px solid red; */
+    padding-top: 1em;
+    gap: 0.5em;
 }
 
 .letter-grid-btn {
     color: white;
     font-weight: bold;
-    font-size: 1em;
+    font-size: calc(1rem + 1vw);
     cursor: pointer;
     border: 2px solid #2F4550;
     border-radius: 10px;
-    /* margin: 1em; */
-    min-width: fit-content;
-    max-width: max-content;
-    max-height: 4em;
-    /* min-height: 60%; */
-    /* max-height: fit-content; */
-    padding: 1.5em 0.5em;
+    max-height: 50%;
+    padding: 0.5em;
     z-index: 10;
 
     display: grid;
@@ -51,7 +39,6 @@
     display: flex;
     text-align: center;
     justify-content: center;
-    /* padding: 1em; */
     flex-wrap: wrap;
     min-width: 50vw;
     gap: 0.5em;
@@ -64,7 +51,7 @@
     align-content: center;
     color: white;
     font-weight: bold;
-    font-size: 1em;
+    font-size: calc(1rem + 1vw);
     border: 2px solid #2F4550;
     border-radius: 10px;
     min-width: 4vw;

@@ -29,7 +29,7 @@ function App() {
     <Routes>
       <Route path='/' element={<Homepage />} />
       <Route path='/settings' element={<SettingsPage settings={settings} />} />
-      <Route path='/play' element={<GamePage settings={settings} />} />
+      <Route path='/play' element={<GamePage settings={settings} setSettings={setSettings} />} />
       <Route path='*' element={<NotFound404 />}/>
     </Routes>
   );
